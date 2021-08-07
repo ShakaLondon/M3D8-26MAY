@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+      integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+      crossorigin="anonymous"
+    />
+
+    <title>Strive CRUD Products</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="./index.html">Strive CRUD Products</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="./index.html"
+              >Home</a
+            >
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="./backoffice.html">Backoffice<span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item active">
+            <a class="nav-link" href="./">Directory</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <h2 class="mt-5 mb-3">Backoffice</h2>
+
+          <form onsubmit="handleSubmit(event)">
+            <div class="form-group">
+              <label for="name">Product name</label>
+              <input
+                id="name"
+                type="text"
+                class="form-control"
+                aria-describedby="name"
+              />
+              <!-- <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small> -->
+            </div>
+            <div class="form-group">
+              <label for="description">Product description</label>
+              <textarea
+                id="description"
+                type="text"
+                rows="6"
+                class="form-control"
+                aria-describedby="product description"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="price">Product price</label>
+              <input
+                id="price"
+                type="number"
+                class="form-control"
+                aria-describedby="product price"
+              />
+            </div>
+            <div class="form-group">
+              <label for="imageUrl">Image link</label>
+              <input
+                id="imageUrl"
+                type="text"
+                class="form-control"
+                aria-describedby="imageUrl"
+              />
+            </div>
+            <div class="form-group">
+              <label for="brand">Brand</label>
+              <input
+                id="brand"
+                type="text"
+                class="form-control"
+                aria-describedby="brand"
+              />
+            </div>
+            <div class="form-group">
+              <label for="userId">User ID</label>
+              <input
+                id="userId"
+                type="text"
+                class="form-control"
+                aria-describedby="userId"
+              />
+            </div>
+            <input type="submit" class="btn btn-primary" value="Submit" />
+          </form>
+        </div>
+      </div>
+    </div>
+    <script>
+      //     OBJ MODEL
+      // {
+      //     "name": "Appointment 5",
+      //     "description": "Test appointment for morning lecture",
+      //     "price": 50,
+      //     "time": "2021-05-26T08:14:00.000Z"
+      // }
+
+      const handleSubmit = async (event) => {
+        const url = "https://striveschool-api.herokuapp.com/api/product/";
+        event.preventDefault();
+        // this is stopping the default behavior from the browser
+        // about this specific event, which would instead refresh the page and insert some
+        // querystrings into the address bar
+        // console.log(e);
+
+        // let name = document.getElementById("name").value;
+
+        const myProduct = {
+          name: document.getElementById("name").value,
+          description: document.getElementById("description").value,
+          brand: document.getElementById("brand").value,
+          price: document.getElementById("price").value,
+          imageUrl: document.getElementById("imageUrl").value,
+          userId: document.getElementById("userId").value,
+
+        };
+
+        // console.log("Handle submit", myEvent);
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            // POST method is used for CREATING NEW RESOURCES
+            body: JSON.stringify(myProduct),
+            // the body property is the payload of our call,
+            // so the content we want to carry!
+            // it must be a STRING
+            // so our myEvent object needs to be stringified
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MGIwZGZiYmRjMTQ1ODAwMTVlNGFlZTUiLCJpYXQiOjE2MjgxNzI3NTIsImV4cCI6MTYyOTM4MjM1Mn0.3l9bESPIwfdvbcwKBLjVi2ide2sD5OOQKNVOKwS5nEs"
+            },
+            // the headers in an HTTP call are all about meta-information
+            // we need to pass the "Content-Type" to make our APIs aware
+            // that our payload is not any string, but it's an object stringified
+          });
+
+          console.log("RESPONSE", response);
+          if (response.ok) {
+            // everything went well
+            const data = await response.json();
+            alert("Product created sccessfully with an id of " + data._id);
+          } else {
+            // something went wrong
+
+            //since fetch will never throw an error except when there's no connection we can rely on response.ok being false and
+            //deal with status codes by manually throw an exception that will be caught by the catch clause below
+            if (response.status === 400) {
+              throw new Error("Bad request with status 400");
+            } else if (response.status === 401) {
+              throw new Error("Anauthorized with status 401");
+            } else if (response.status === 404) {
+              throw new Error("Not found with status 404");
+            }
+          }
+        } catch (err) {
+          //Every error that happens or gets thrown by us in the try block will be handled here
+
+          // console.log(err);
+          alert(err.message);
+        }
+
+        // console.log(response);
+      };
+    </script>
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

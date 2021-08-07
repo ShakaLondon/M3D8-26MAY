@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+      integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+      crossorigin="anonymous"
+    />
+
+    <title>Strive CRUD Products</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="./index.html">Strive CRUD Products</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="./index.html"
+              >Home</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./backoffice.html">Backoffice</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./">Directory</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <img
+      src="https://images.unsplash.com/photo-1529651737248-dad5e287768e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1301&q=80"
+      style="height: 30vh; width: 100%; object-fit: cover"
+    />
+
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+          <h4 class="mt-5 mb-3">Product Details</h4>
+          <div id="event-details">
+            <div class="spinner-border text-success" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="btn btn-success mt-3"
+            onclick="handleEdit()"
+          >
+            EDIT PRODUCT
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      const url = "https://striveschool-api.herokuapp.com/api/product/";
+      const urlParams = new URLSearchParams(window.location.search);
+      let productID = urlParams.get("id");
+
+      // getting the id from the query string to retrieve the informations about this event and use them in the UI
+
+      window.onload = async () => {
+        const container = document.getElementById("event-details"); // getting the node of event-details to which we are going to inject the innerHTML
+
+        try {
+          const response = await fetch(url + productID, {
+            headers: {
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MGIwZGZiYmRjMTQ1ODAwMTVlNGFlZTUiLCJpYXQiOjE2MjgxNzI3NTIsImV4cCI6MTYyOTM4MjM1Mn0.3l9bESPIwfdvbcwKBLjVi2ide2sD5OOQKNVOKwS5nEs"
+            }
+          });
+
+          if (response.ok) {
+            const eventData = await response.json();
+
+            //transforming the data from eventData into the UI of our detail page
+            // this will also erase the loader that's inside the event-details HTML by default (we are NOT appending, but reassigning the innerHTML to something else)
+            container.innerHTML = `
+            <h1 class="font-weight-bolder" style="line-height: 1; letter-spacing: 0.03rem">${
+              eventData.name
+            }</h1>
+            <p class="text-monospace">${
+              eventData.brand
+            }</p>
+            <img src="${eventData.imageUrl}" class="my-4 mx-4"></img>
+            <h6 class="bg-light pl-2 py-3"> Server Details</h6>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item pl-2"><strong>id:</strong> ${
+                eventData._id
+              }
+              <li class="list-group-item pl-2"><strong>createdAt:</strong> ${
+                eventData.createdAt
+              }
+              <li class="list-group-item pl-2"><strong>updatedAt:</strong> ${
+                eventData.updatedAt
+              }
+            </ul>
+            `;
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      };
+
+      const handleEdit = () => {
+        window.location.assign("./backoffice.html?productId=" + productID); // pushing the user to another page + the eventId as query string.
+        // "eventId" is the key for the params this time, remember it was just "id" in the link to come here? we specified it in the link from the homepage
+      };
+    </script>
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

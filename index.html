@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+      integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l"
+      crossorigin="anonymous"
+    />
+
+    <title>Strive CRUD Products</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="./index.html">Strive CRUD Products</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item active">
+            <a class="nav-link" href="./index.html"
+              >Home<span class="sr-only">(current)</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./backoffice.html">Backoffice</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="./">Directory</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <h2 class="mt-5 mb-3">Current Products</h2>
+          <ul id="currentEvents" class="list-group">
+            <!-- <li class="list-group-item">An item</li> -->
+          </ul>
+        </div>
+      </div>
+    </div>
+    <script>
+      const globalData = [];
+
+   const deleteProduct = async function deletion (itemID) {
+
+    console.log(itemID)
+
+      const url = `https://striveschool-api.herokuapp.com/api/product/${itemID}`;
+
+      try {
+      const response = await fetch(url, {
+        method: "DELETE",
+        headers: {
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MGIwZGZiYmRjMTQ1ODAwMTVlNGFlZTUiLCJpYXQiOjE2MjgxNzI3NTIsImV4cCI6MTYyOTM4MjM1Mn0.3l9bESPIwfdvbcwKBLjVi2ide2sD5OOQKNVOKwS5nEs"
+        }
+        }); // this is getting the response from the API for a fetch request
+      const products = await response.json();
+
+      location.reload();
+      return false;
+
+    } catch (err) {
+      console.log(err);
+
+      }}
+
+
+
+     ;
+
+      window.onload = async function () {
+        const url = "https://striveschool-api.herokuapp.com/api/product/";
+        const currentEvents = document.getElementById("currentEvents");
+
+        // fetch(url, { method: "GET" })
+        //   .then((res) => res.json())
+        //   .then((events) => {
+        //       DOM MANIPULATION GOES HERE
+        //       forEach
+        //   })
+        //   .catch((err) => console.log(err));
+
+
+
+        try {
+          const response = await fetch(url, {
+            headers: {
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MGIwZGZiYmRjMTQ1ODAwMTVlNGFlZTUiLCJpYXQiOjE2MjgxNzI3NTIsImV4cCI6MTYyOTM4MjM1Mn0.3l9bESPIwfdvbcwKBLjVi2ide2sD5OOQKNVOKwS5nEs"
+            }
+            }); // this is getting the response from the API for a fetch request
+          const events = await response.json(); // this is transforming the response in a json, asyncronous operation!
+
+          //only after "response" and "events" variables receive the data, they get created, and the execution of the following code resumes
+          //you can be sure that "events" variable will always have a value inside, and will never be undefined
+          if (events.length > 0) {
+            events.forEach((event) => {
+              const listItem = document.createElement("li");
+              listItem.classList.add(
+                "list-group-item",
+                "d-flex",
+                "justify-content-between"
+              );
+
+              let productname = event.name
+
+              let previewname = productname.slice(0,45)
+
+              listItem.innerHTML = `<a href="./detail.html?id=${event._id}"><span>${previewname}</span></a><div class="d-inline-flex"><button id="deleteProduct" onclick="deleteProduct(${event._id})" class="btn btn-dark mx-2">DELETE</button><span class="btn btn-dark disabled">${event.price}€</span></div>`;
+
+              let deleteButton = listItem.querySelector("#deleteProduct")
+
+              console.log(deleteButton)
+
+              deleteButton.addEventListener("click", function() { deleteProduct(event._id) })
+
+              currentEvents.appendChild(listItem);
+            });
+          } else {
+            currentEvents.innerHTML = `<div class="alert alert-info" role="alert">
+                                        No events planned yet!
+                                        </div>`;
+          }
+
+          //   console.log(events);
+
+          //   getData(url, currentEvents); // the function is not returning anything at the moment so we can just run it and let it do its thing,
+          // otherwise you need to "await" it in order to receive the value from the return of the function when the promise settles
+        } catch (err) {
+          console.log(err);
+        }
+        console.log("this is happening after everything");
+      };
+
+      // EXAMPLE OF AN EXTERNAL ASYNC FUNCTION
+
+      //   const getData = async (url, DOMnode) => {
+      //     // const url = "https://striveschool-api.herokuapp.com/api/agenda/";
+      //     const currentEvents = document.getElementById("currentEvents");
+      //     try {
+      //       const response = await fetch(url);
+      //         const events = await response.json();
+      //
+      //         if (events.length > 0) {
+      //           DOMnode.innerHTML = "do something with it";
+      //         } else {
+      //           DOMnode.innerHTML = "not enough events";
+      //         }
+      //
+      //     } catch (err) {
+      //       console.log(err);
+      //     }
+      //   };
+    </script>
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
