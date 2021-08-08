@@ -90,7 +90,7 @@ smallText.innerHTML = poundprice
 
 const titleText = eachCard[x].querySelector('p')
 
-titleText.innerHTML = productTitle
+titleText.innerHTML = `<a href="./Strive-Detail.html?productId=${input[x]._id}">${productTitle}</a>`
 
 // CREATE SPAN FOR ID
 

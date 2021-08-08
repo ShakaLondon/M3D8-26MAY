@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-wEmeIV1mKuiNpC+IOBjI7aAzPcEZeedi5yW5f2yOq55WWLwNGmvvx4Um1vskeMj0" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700" rel="stylesheet" type="text/css" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles.css" rel="stylesheet" />
+    <!--
+            You are creating the "shopping cart experience" for an Online Marketplace.
+            From this API you can retrieve the list of the available books:
+            https://striveschool-api.herokuapp.com/books
+
+            What you need to do is:
+            0) Get all the products from the API using a fetch
+            1) Display the list of items available on the page using template literals `` and .forEach
+            2) Add an "Add to Cart" button
+            3) When the button is pressed, change the style of the item and add its data to another list. That's going to be the Cart's list. Display it somewhere.
+            4) Allow the user to delete items from the cart's list
+            5) Add a "Skip" or "Ignore" button to each book in the page
+            6) When pressed, the button should remove the corresponding item from the page, so the user can focus on those that interests him more.
+            7) Add a search bar where the user can search for books. When the user types more than 3 chars, you should filter the content of the page to show only the items with a matching name (hint: use .filter method)
+            
+            
+            [EXTRA]
+            8) Add a "Clean Cart" button, to clean the whole list.
+            9) Create a "Detail page" for the product. When the user clicks on a product name, the app should redirect him to the secondary page, passing the ASIN in query string
+            10) In the detail page retrieve the ASIN from the query string and use it to fetch and show some details of the selected product (use this endpoint: https://striveschool-api.herokuapp.com/books/1940026091 to fetch the details of a specific book)
+        -->
+
+        <style>
+
+          .navbar-brand {
+            font-size: 2.5em !important;
+          }
+
+          #store-brand {
+            height: 1.5em !important;
+            width: auto;
+          }
+
+          .title {
+            font-size: 1.5em !important;
+          }
+
+          section {
+            width: 75vw;
+          }
+
+          .hide {
+            display: none;
+          }
+
+          /* .row {
+            width: 75vw;
+          } */
+
+          .overlay {
+            /* Height & width depends on how you want to reveal the overlay (see JS below) */   
+            height: 100%;
+            width: 0px;
+            position: fixed; /*Stay in place*/
+            z-index: 2020; /* Sit on top */
+            right: 0;
+            top: 0;
+            background-color: rgb(34, 22, 8); /* Black fallback color */
+            background-color: rgba(34, 22, 8); /* Black w/opacity */
+            overflow-x: hidden; /* Disable horizontal scroll */
+            transition: 0.5s;
+          /* 0.5 second transition effect to slide in or slide down the overlay (height or width, depending on reveal) */
+          }
+
+          /* Position the content inside the overlay */
+          .overlay-content {
+            /* position: relative;
+            top: 4%; 25% from the top */
+            width: 100%; /* 100% width */
+            text-align: left; /* Centered text/links */
+             /* 30px top margin to avoid conflict with the close button on smaller screens */
+          }
+
+          /* The navigation links inside the overlay */
+          .overlay-content > a {
+            /* padding: 8px; */
+            text-decoration: none;
+            font-size: 20px;
+            font-family: "Circular Spotify Tx T Black", sans-serif;
+            color: #818181;
+            display: block; /* Display block instead of inline */
+            transition: 0.3s;
+            z-index: 3;
+            /* Transition effects on hover (color) */
+          }
+
+          .fontBrown {
+            color:  rgb(34, 22, 8);
+          }
+
+          .h7 {
+            font-size: 12px;
+          }
+
+          .cartItem {
+            background-color: rgba(255, 255, 255, 0.233);
+            height: 90px;
+            width: 300px;
+            position: absolute;
+            z-index: 1 !important;
+
+          }
+
+          .footer {
+            position: absolute;
+            bottom: 0;
+            z-index: 4040;
+            right: 0;
+            
+            
+          }
+
+          .header {
+            position: fixed;
+            top: 0px;
+            z-index: 4040;
+            
+          }
+
+          /* .header2 {
+            position: fixed;
+            top: 50px;
+            z-index: 8020;
+          } */
+
+          .bg-brown {
+            background-color: rgba(34, 22, 8) !important;
+          }
+
+          .relative {
+            position: relative;
+          }
+
+          #cartBox {
+            margin-top: 46px;
+            padding-bottom: 0px;
+          }
+
+          label {
+            z-index: 1;
+          }
+
+          /* .margin-top {
+            margin-top: 100px;
+          } */
+
+          .inline {
+            display: inline-block;
+            width: 0px;
+          }
+
+          .card-body {
+            min-height: 160px;
+          }
+
+          .btn-group {
+            position: absolute;
+            /* display: inline-flex !important; */
+            bottom: 20px;
+          }
+
+          small.text-muted {
+            position: absolute;
+            bottom: 25px;
+            right: 20px;
+          }
+
+          .carousel .carousel-indicators li {
+            background-color: #fff;
+            background-color: rgba(70, 70, 70, 0.25);
+          }
+
+          .carousel .carousel-indicators .active {
+            background-color: #444;
+          }
+
+          #itemnumber {
+            z-index: 1000;
+          }
+
+          /* .fa-heart {
+            font-weight: bold;
+            color: red;
+          } */
+          
+          .displayNone {
+            display: none;
+          }
+
+          .inCart {
+            background-color: green;
+            color: white;
+          }
+
+          .cartImage {
+            width: 45px;
+            height: 70px;
+          }
+
+          form {
+            z-index: 1000;
+            
+          }
+
+          .titleWidth {
+            width: 155px;
+          }
+
+          .itemPrice {
+            min-width: 35px;
+          }
+
+          .deleteButton {
+            z-index: 2020;
+          }
+
+
+
+          
+          
+
+        </style>
+  </head>
+
+  <body id="page-top">
+  <main id="main" class="h-100">
+    <!-- Navigation-->
+    <nav class="navbar navbar-expand-lg navbar-dark static-top py-2" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand" href="#page-top"><i class="fas fa-rocket align-self-center mx-auto"></i><img id="store-brand" src="assets/STRIVEMARKET.png" alt="..." /></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                Menu
+                <i class="fas fa-bars ms-1"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="#contact"><i class="fa title fa-cart-plus" onclick="openNav()"></i></a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <nav id="sideNav" class="container overlay pr-2 px-0">
+      <div class="container-fluid overlay-content">
+        <div class="row px-0 header">
+          <div class="col-12 pl-0">
+            <span class="inline bg-white d-inline-flex container-fluid py-2 pl-3 pr-0">
+              <p class="mb-0 bg-white ml-0 mr-5 pr-5 pl-0 align-self-center textBrown">CART</p>
+              <button href="javascript:void(0)" class="closebtn ml-5 pr-1 pl-5 border-0 bg-transparent" onclick="closeNav()"></a>
+                <i class="fa fa-times title pl-3" id="closebtnshak"></i>
+              </button>
+            </span>
+          </div>
+        </div> 
+          <!-- <div class="row header2 ">
+            <div class="col-12 bg-brown">
+              <span class="">
+                <p class="text-white ml-2 h7 py-2 mb-0">3 items in cart</p>
+              </span>
+            </div> 
+          </div> -->
+        <!-- </div> -->
+
+       <!-- cart template -->
+        <div class="container-fluid px-0 overlay-content" id="cartBox">
+          
+          </div> 
+
+
+        <!-- cart item 1
+
+          <div class="d-flex flex-row ml-0 mr-0 align-items-center relative margin-top">
+
+            <div class="row cartItem d-block border-top border-white"></div>
+
+            <div class="col-2 d-inline-flex align-items-center justify-content-center mx-auto px-auto pl-4">
+              <img src="http://via.placeholder.com/45x70" alt="book-cart-image" class="cartImage">
+            </div> 
+            <div class="col-7 d-inline-flex ml-0 px-auto mx-auto py-auto">
+              <span class="d-flex">
+                <p class="text-white ml-0 h7 py-2 mb-0">This is the title of the book</p>
+              </span>
+            </div> 
+            <div class="col-3 d-inline-flex mx-auto pr-0 justify-content-center py-auto">
+            <span>
+              <label for="inputState" class="text-center h7 text-warning">QTY</label>
+              <select class="form-control form-control-sm">
+                <option selected>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+                <option>6</option>
+              </select>
+            <span>
+              <span>
+                <p class="text-white ml-3 h7 py-2 mx-auto mb-0">£26.90</p>
+              </span>
+
+          </div>
+          </div>
+          
+                  cart item 2
+
+                  <div class="d-flex flex-row ml-0 mr-0 align-items-center">
+
+                    <div class="row cartItem d-block border-top border-white"></div>
+        
+                    <div class="col-2 d-inline-flex align-items-center justify-content-center mx-auto px-auto pl-4">
+                      <img src="http://via.placeholder.com/45x70" alt="book-cart-image" class="cartImage">
+                    </div> 
+                    <div class="col-7 d-inline-flex ml-0 px-auto mx-auto py-auto">
+                      <span class="d-flex">
+                        <p class="text-white ml-0 h7 py-2 mb-0">This is the title of the book</p>
+                      </span>
+                    </div> 
+                    <div class="col-3 d-inline-flex mx-auto pr-0 justify-content-center py-auto">
+                    <span>
+                      <label for="inputState" class="text-center h7 text-warning">QTY</label>
+                      <select class="form-control form-control-sm">
+                        <option selected>1</option>
+                        <option>2</option>
+                        <option>3</option>
+                        <option>4</option>
+                        <option>5</option>
+                        <option>6</option>
+                      </select>
+                    <span>
+                      <span>
+                        <p class="text-white ml-3 h7 py-2 mx-auto mb-0">£26.90</p>
+                      </span>
+        
+                  </div>
+                  </div>
+                  
+                          cart item 3
+
+                          <div class="d-flex flex-row ml-0 mr-0 align-items-center">
+
+                            <div class="row cartItem d-block border-top border-white"></div>
+                
+                            <div class="col-2 d-inline-flex align-items-center justify-content-center mx-auto px-auto pl-4">
+                              <img src="http://via.placeholder.com/45x70" alt="book-cart-image" class="cartImage">
+                            </div> 
+                            <div class="col-7 d-inline-flex ml-0 px-auto mx-auto py-auto">
+                              <span class="d-flex">
+                                <p class="text-white ml-0 h7 py-2 mb-0">This is the title of the book</p>
+                              </span>
+                            </div> 
+                            <div class="col-3 d-inline-flex mx-auto pr-0 justify-content-center py-auto">
+                            <span>
+                              <label for="inputState" class="text-center h7 text-warning">QTY</label>
+                              <select class="form-control form-control-sm">
+                                <option selected>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                                <option>6</option>
+                              </select>
+                            <span>
+                              <span>
+                                <p class="text-white ml-3 h7 py-2 mx-auto mb-0">£26.90</p>
+                              </span>
+                
+                          </div>
+                          </div>
+                                cart item 4
+
+                                <div class="d-flex flex-row ml-0 mr-0 align-items-center">
+
+                                  <div class="row cartItem d-block border-top border-white"></div>
+                      
+                                  <div class="col-2 d-inline-flex align-items-center justify-content-center mx-auto px-auto pl-4">
+                                    <img src="http://via.placeholder.com/45x70" alt="book-cart-image" class="cartImage">
+                                  </div> 
+                                  <div class="col-7 d-inline-flex ml-0 px-auto mx-auto py-auto">
+                                    <span class="d-flex">
+                                      <p class="text-white ml-0 h7 py-2 mb-0">This is the title of the book</p>
+                                    </span>
+                                  </div> 
+                                  <div class="col-3 d-inline-flex mx-auto pr-0 justify-content-center py-auto">
+                                  <span>
+                                    <label for="inputState" class="text-center h7 text-warning">QTY</label>
+                                    <select class="form-control form-control-sm">
+                                      <option selected>1</option>
+                                      <option>2</option>
+                                      <option>3</option>
+                                      <option>4</option>
+                                      <option>5</option>
+                                      <option>6</option>
+                                    </select>
+                                  <span>
+                                    <span>
+                                      <p class="text-white ml-3 h7 py-2 mx-auto mb-0">£26.90</p>
+                                    </span>
+                      
+                                </div>
+                                </div>
+                                cart item 4
+
+                                <div class="d-flex flex-row ml-0 mr-0 align-items-center">
+
+                                  <div class="row cartItem d-block border-top border-white"></div>
+                      
+                                  <div class="col-2 d-inline-flex align-items-center justify-content-center mx-auto px-auto pl-4">
+                                    <img src="http://via.placeholder.com/45x70" alt="book-cart-image" class="cartImage">
+                                  </div> 
+                                  <div class="col-7 d-inline-flex ml-0 px-auto mx-auto py-auto">
+                                    <span class="d-flex">
+                                      <p class="text-white ml-0 h7 py-2 mb-0">This is the title of the book</p>
+                                    </span>
+                                  </div> 
+                                  <div class="col-3 d-inline-flex mx-auto pr-0 justify-content-center py-auto">
+                                  <span>
+                                    <label for="inputState" class="text-center h7 text-warning">QTY</label>
+                                    <select class="form-control form-control-sm">
+                                      <option selected>1</option>
+                                      <option>2</option>
+                                      <option>3</option>
+                                      <option>4</option>
+                                      <option>5</option>
+                                      <option>6</option>
+                                    </select>
+                                  <span>
+                                    <span>
+                                      <p class="text-white ml-3 h7 py-2 mx-auto mb-0">£26.90</p>
+                                    </span>
+                      
+                                </div>
+                                </div>
+                              </div> -->
+
+
+                              
+                                <div class="row footer px-0 mx-0">
+                                  <div class="col-12 pl-0 px-0 mx-0">
+                                    <span class="inline bg-white d-inline-flex container-fluid mx-0 px-0 justify-content-between">
+                                      <p class="mb-0 bg-white pl-2 pr-auto align-self-center textBrown h7">5 items in cart</p>
+                                      <p class="mb-0 bg-white pr-2 pl-auto align-self-center textBrown"><span class="h7">Total</span><span class="font-weight-bold" id="priceTotal"> £26.09</span></p>
+                                    </span>
+                                  </div>
+                                </div>
+                              
+                                
+                          
+      <!-- Button to close the overlay navigation -->
+      
+      
+   
+   
+
+      <!-- Overlay content -->
+      <!-- <div class="overlay-content container d-block mt-0 ml-0">
+        <a href="#" class="mt-0 text-white">Premium</a>
+        <a href="#" class="mt-0 text-white">Support</a>
+        <a href="#" class="mt-0 text-white">Download</a>
+        <a href="#" class="mt-0"
+          ><i
+            class="far fa-horizontal-rule img-fluid"
+            id="navRule"
+          ></i
+        ></a>
+        <a href="#" class="mt-0">Sign Up</a>
+        <a href="index.html" class="mt-0">Log In</a>
+
+      -->
+    
+    </div>
+    </nav>
+
+    <div class="container-fluid relative">
+        <div class="row">
+            <div class="col-6 px-0">
+                <div class="jumbotron jumbotron-fluid jumbodetail">
+                    <div class="container">
+                      <h1 class="display-4">Fluid jumbotron</h1>
+                      <p class="lead">This is a modified jumbotron that occupies the entire horizontal space of its parent.</p>
+                    </div>
+                  </div>
+
+            </div>
+            <div class="col-6 px-0">
+                <div class="card border-0 text-right my-4" style="width: 50vw;">
+                    <div class="card-body mx-4">
+                      <h5 class="card-title producttitle">Product title</h5>
+                      <h6 class="card-subtitle mb-2 text-muted productbrand">product brand</h6>
+                      <p class="card-text productdescription">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                      <h5 class="card-title productprice">Product price</h5>
+                    </div>
+                  </div>
+                
+                
+            </div>
+        </div>
+        
+    </div>
+
+      </main>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.min.js" integrity="sha384-lpyLfhYuitXl2zRZ5Bn2fqnhNAKOAaM/0Kr9laMspuaMiZfGmfwRNFh8HlMy49eQ" crossorigin="anonymous"></script>
+    <!-- <script src="./script3.js"></script> -->
+  </body>
+</html>

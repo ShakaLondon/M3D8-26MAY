@@ -52,6 +52,9 @@
       <div class="row justify-content-center">
         <div class="col-md-6">
           <h2 class="mt-5 mb-3">Backoffice</h2>
+          <h4 class="mt-1 mb-3" id="subtitle"></h4>
+        </hr>
+          <span id="alert-box"></span>
 
           <form onsubmit="handleSubmit(event)">
             <div class="form-group">
@@ -110,7 +113,17 @@
                 aria-describedby="userId"
               />
             </div>
-            <input type="submit" class="btn btn-primary" value="Submit" />
+            <button type="submit" class="btn btn-primary" value="Submit"> 
+              Submit
+              <div
+              id="spinner"
+              class="spinner-border spinner-border-sm d-none"
+              role="status"
+            >
+              <span class="sr-only">Loading...</span>
+            </div>
+          </button>
+            <button type="submit" class="btn btn-primary d-none" value="Delete" id="delete-btn">Delete</button>
           </form>
         </div>
       </div>
@@ -124,6 +137,79 @@
       //     "time": "2021-05-26T08:14:00.000Z"
       // }
 
+      const urlParams = new URLSearchParams(window.location.search); // ?eventId=1289391872398123
+      let productId = urlParams.get("productId");
+
+
+
+      const endpoint = productId
+        ? "https://striveschool-api.herokuapp.com/api/product/" + productId
+        : "https://striveschool-api.herokuapp.com/api/product/";
+
+      const method = productId ? "PUT" : "POST";
+
+
+
+      window.onload = async () => {
+        console.log("Resource ID: ", productId);
+
+        
+
+        // 2) SECOND OF ALL
+        // we retrieve the data of the specific event we are trying to edit (if you came here from the detail page)
+        if (productId) {
+          // this is to check if you actually have an id or not
+          document.getElementById("subtitle").innerText = " — Edit Product";
+
+          //3) if you have an id go on and fetch the event details
+          const response = await fetch(endpoint, {
+            // method,
+            // POST method is used for CREATING NEW RESOURCES
+            // body: JSON.stringify(myProduct),
+            // the body property is the payload of our call,
+            // so the content we want to carry!
+            // it must be a STRING
+            // so our myEvent object needs to be stringified
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MGIwZGZiYmRjMTQ1ODAwMTVlNGFlZTUiLCJpYXQiOjE2MjgxNzI3NTIsImV4cCI6MTYyOTM4MjM1Mn0.3l9bESPIwfdvbcwKBLjVi2ide2sD5OOQKNVOKwS5nEs"
+            },
+          }); // "endpoint" is a variable that will contain the correct endpoint for any case
+          const eventDetails = await response.json();
+
+          document.getElementById("delete-btn").classList.remove("d-none"); // this will display the delete button if you are in "edit mode"
+
+          // 4) populate the fields with the values from the event you chose to modify
+          populateFields(eventDetails); // this function will prefill the form inputs with the eventDetails object that you retrieved from the fetch
+
+          // N.B. The fetch here was necessary to grab the EXACT values of the event object for the Event you are trying to modify, so that you can then prefill the form fields with them.
+        } else {
+          document.getElementById("subtitle").innerText = " — Create an Product";
+        }
+      };
+
+      const objModel = {
+        // object model for our resource
+        name: "",
+        description: "",
+        brand: "",
+        imageUrl: "",
+        price: "",
+        userId: "",
+      };
+
+      const populateFields = (obj = objModel) => {
+        // using the object model as default parameter, in case of calling populateFields() without any parameter, to erase the fields
+        document.getElementById("name").value = obj.name; // in case of empty parameter obj will become = objModel
+        document.getElementById("description").value = obj.description;
+        document.getElementById("brand").value = obj.brand;
+        document.getElementById("imageUrl").value = obj.imageUrl;
+        document.getElementById("price").value = obj.price;
+        document.getElementById("userId").value = obj.userId;
+      };
+
+
+
       const handleSubmit = async (event) => {
         const url = "https://striveschool-api.herokuapp.com/api/product/";
         event.preventDefault();
@@ -133,6 +219,8 @@
         // console.log(e);
 
         // let name = document.getElementById("name").value;
+
+        isLoading(true)
 
         const myProduct = {
           name: document.getElementById("name").value,
@@ -146,8 +234,8 @@
 
         // console.log("Handle submit", myEvent);
         try {
-          const response = await fetch(url, {
-            method: "POST",
+          const response = await fetch(endpoint, {
+            method,
             // POST method is used for CREATING NEW RESOURCES
             body: JSON.stringify(myProduct),
             // the body property is the payload of our call,
@@ -167,7 +255,14 @@
           if (response.ok) {
             // everything went well
             const data = await response.json();
-            alert("Product created sccessfully with an id of " + data._id);
+            // alert("Product created sccessfully with an id of " + data._id);
+
+            showAlert(
+              "success",
+              productId
+                ? "Appointment with an id of " + data._id + " edited successfully"
+                : "Appointment created sccessfully with an id of " + data._id
+            );
           } else {
             // something went wrong
 
@@ -186,10 +281,39 @@
 
           // console.log(err);
           alert(err.message);
+        } finally {
+          isLoading(false);
         }
 
         // console.log(response);
       };
+
+      const showAlert = (type, msg) => {
+        // custom function to display a nicer bootstrap alert in the page when you decide to call it
+        const container = document.getElementById("alert-box"); //grabs the div to put the alert into
+
+        container.innerHTML = ` 
+        <div class="alert alert-${type}" role="alert">
+         ${msg}
+        </div>
+        `;
+
+        setTimeout(() => {
+          // erases the alert after 4 seconds
+          container.innerHTML = "";
+        }, 4000);
+      };
+
+      const isLoading = (loading) => {
+        // toggles the submit button loader on/off
+        if (loading) {
+          document.getElementById("spinner").classList.remove("d-none");
+        } else {
+          document.getElementById("spinner").classList.add("d-none");
+        }
+      };
+
+
     </script>
     <script
       src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
