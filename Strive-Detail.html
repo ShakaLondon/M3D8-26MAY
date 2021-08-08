@@ -242,7 +242,7 @@
     <!-- Navigation-->
     <nav class="navbar navbar-expand-lg navbar-dark static-top py-2" id="mainNav">
         <div class="container">
-            <a class="navbar-brand" href="#page-top"><i class="fas fa-rocket align-self-center mx-auto"></i><img id="store-brand" src="assets/STRIVEMARKET.png" alt="..." /></a>
+            <a class="navbar-brand" href="./Strive-Marketplace.html"><i class="fas fa-rocket align-self-center mx-auto"></i><img id="store-brand" src="assets/STRIVEMARKET.png" alt="..." /></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
                 Menu
                 <i class="fas fa-bars ms-1"></i>
@@ -487,21 +487,18 @@
     <div class="container-fluid relative">
         <div class="row">
             <div class="col-6 px-0">
-                <div class="jumbotron jumbotron-fluid jumbodetail">
-                    <div class="container">
-                      <h1 class="display-4">Fluid jumbotron</h1>
-                      <p class="lead">This is a modified jumbotron that occupies the entire horizontal space of its parent.</p>
-                    </div>
+                <div class="jumbotron jumbotron-fluid jumbodetail" id="jumbodetail">
+                    
                   </div>
 
             </div>
             <div class="col-6 px-0">
                 <div class="card border-0 text-right my-4" style="width: 50vw;">
                     <div class="card-body mx-4">
-                      <h5 class="card-title producttitle">Product title</h5>
-                      <h6 class="card-subtitle mb-2 text-muted productbrand">product brand</h6>
-                      <p class="card-text productdescription">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                      <h5 class="card-title productprice">Product price</h5>
+                      <h5 class="card-title" id="producttitle">Product title</h5>
+                      <h6 class="card-subtitle mb-2 text-muted" id="productbrand">product brand</h6>
+                      <p class="card-text" id="productdescription">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                      <h5 class="card-title" id="productprice">Product price</h5>
                     </div>
                   </div>
                 
@@ -512,6 +509,67 @@
     </div>
 
       </main>
+
+      <script>
+
+    const urlParams = new URLSearchParams(window.location.search); // ?eventId=1289391872398123
+      let productId = urlParams.get("productId");
+
+
+
+      const endpoint = "https://striveschool-api.herokuapp.com/api/product/" + productId
+
+
+
+      window.onload = async () => {
+        console.log("Resource ID: ", productId);
+
+        
+
+        // 2) SECOND OF ALL
+        // we retrieve the data of the specific event we are trying to edit (if you came here from the detail page)
+        if (productId) {
+
+          const response = await fetch(endpoint, {
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MGIwZGZiYmRjMTQ1ODAwMTVlNGFlZTUiLCJpYXQiOjE2MjgxNzI3NTIsImV4cCI6MTYyOTM4MjM1Mn0.3l9bESPIwfdvbcwKBLjVi2ide2sD5OOQKNVOKwS5nEs"
+            },
+          }); // "endpoint" is a variable that will contain the correct endpoint for any case
+          const productDetails = await response.json();
+
+          populateFields(productDetails); // this function will prefill the form inputs with the eventDetails object that you retrieved from the fetch
+
+          // N.B. The fetch here was necessary to grab the EXACT values of the event object for the Event you are trying to modify, so that you can then prefill the form fields with them.
+        } else {
+          document.getElementById("subtitle").innerText = " — Create an Product";
+        }
+      };
+
+      const objModel = {
+        // object model for our resource
+        name: "",
+        description: "",
+        brand: "",
+        imageUrl: "",
+        price: "",
+        userId: "",
+      };
+    
+      const populateFields = (obj = objModel) => {
+        // using the object model as default parameter, in case of calling populateFields() without any parameter, to erase the fields
+        document.getElementById("producttitle").innerHTML = obj.name; // in case of empty parameter obj will become = objModel
+        document.getElementById("productbrand").innerHTML = obj.brand;
+        document.getElementById("productdescription").innerHTML = obj.description;
+        document.getElementById("productprice").innerHTML = `£${obj.price}`;
+        document.getElementById("jumbodetail").style.backgroundImage = `url(${obj.imageUrl})`
+        document.getElementById("jumbodetail").style.backgroundRepeat = `no-repeat`
+        document.getElementById("jumbodetail").style.backgroundSize = `cover`
+        // document.getElementById("userId").innerHTML = obj.userId;
+      };
+
+
+      </script>
 
 
 
